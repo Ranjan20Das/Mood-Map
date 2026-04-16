@@ -9,50 +9,288 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppSelfcareRouteImport } from './routes/_app/selfcare'
+import { Route as AppRecommendationsRouteImport } from './routes/_app/recommendations'
+import { Route as AppProfileRouteImport } from './routes/_app/profile'
+import { Route as AppHistoryRouteImport } from './routes/_app/history'
+import { Route as AppHeatmapRouteImport } from './routes/_app/heatmap'
+import { Route as AppEntryRouteImport } from './routes/_app/entry'
+import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
 
-const IndexRoute = IndexRouteImport.update({
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSelfcareRoute = AppSelfcareRouteImport.update({
+  id: '/selfcare',
+  path: '/selfcare',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRecommendationsRoute = AppRecommendationsRouteImport.update({
+  id: '/recommendations',
+  path: '/recommendations',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHistoryRoute = AppHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHeatmapRoute = AppHeatmapRouteImport.update({
+  id: '/heatmap',
+  path: '/heatmap',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEntryRoute = AppEntryRouteImport.update({
+  id: '/entry',
+  path: '/entry',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AppIndexRoute
+  '/auth': typeof AuthRoute
+  '/onboarding': typeof OnboardingRoute
+  '/welcome': typeof WelcomeRoute
+  '/analytics': typeof AppAnalyticsRoute
+  '/entry': typeof AppEntryRoute
+  '/heatmap': typeof AppHeatmapRoute
+  '/history': typeof AppHistoryRoute
+  '/profile': typeof AppProfileRoute
+  '/recommendations': typeof AppRecommendationsRoute
+  '/selfcare': typeof AppSelfcareRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/onboarding': typeof OnboardingRoute
+  '/welcome': typeof WelcomeRoute
+  '/analytics': typeof AppAnalyticsRoute
+  '/entry': typeof AppEntryRoute
+  '/heatmap': typeof AppHeatmapRoute
+  '/history': typeof AppHistoryRoute
+  '/profile': typeof AppProfileRoute
+  '/recommendations': typeof AppRecommendationsRoute
+  '/selfcare': typeof AppSelfcareRoute
+  '/': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/onboarding': typeof OnboardingRoute
+  '/welcome': typeof WelcomeRoute
+  '/_app/analytics': typeof AppAnalyticsRoute
+  '/_app/entry': typeof AppEntryRoute
+  '/_app/heatmap': typeof AppHeatmapRoute
+  '/_app/history': typeof AppHistoryRoute
+  '/_app/profile': typeof AppProfileRoute
+  '/_app/recommendations': typeof AppRecommendationsRoute
+  '/_app/selfcare': typeof AppSelfcareRoute
+  '/_app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/onboarding'
+    | '/welcome'
+    | '/analytics'
+    | '/entry'
+    | '/heatmap'
+    | '/history'
+    | '/profile'
+    | '/recommendations'
+    | '/selfcare'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/auth'
+    | '/onboarding'
+    | '/welcome'
+    | '/analytics'
+    | '/entry'
+    | '/heatmap'
+    | '/history'
+    | '/profile'
+    | '/recommendations'
+    | '/selfcare'
+    | '/'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/auth'
+    | '/onboarding'
+    | '/welcome'
+    | '/_app/analytics'
+    | '/_app/entry'
+    | '/_app/heatmap'
+    | '/_app/history'
+    | '/_app/profile'
+    | '/_app/recommendations'
+    | '/_app/selfcare'
+    | '/_app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  OnboardingRoute: typeof OnboardingRoute
+  WelcomeRoute: typeof WelcomeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/': {
+      id: '/_app/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/selfcare': {
+      id: '/_app/selfcare'
+      path: '/selfcare'
+      fullPath: '/selfcare'
+      preLoaderRoute: typeof AppSelfcareRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/recommendations': {
+      id: '/_app/recommendations'
+      path: '/recommendations'
+      fullPath: '/recommendations'
+      preLoaderRoute: typeof AppRecommendationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/profile': {
+      id: '/_app/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/history': {
+      id: '/_app/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof AppHistoryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/heatmap': {
+      id: '/_app/heatmap'
+      path: '/heatmap'
+      fullPath: '/heatmap'
+      preLoaderRoute: typeof AppHeatmapRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/entry': {
+      id: '/_app/entry'
+      path: '/entry'
+      fullPath: '/entry'
+      preLoaderRoute: typeof AppEntryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/analytics': {
+      id: '/_app/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AppAnalyticsRouteImport
+      parentRoute: typeof AppRoute
     }
   }
 }
 
+interface AppRouteChildren {
+  AppAnalyticsRoute: typeof AppAnalyticsRoute
+  AppEntryRoute: typeof AppEntryRoute
+  AppHeatmapRoute: typeof AppHeatmapRoute
+  AppHistoryRoute: typeof AppHistoryRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppRecommendationsRoute: typeof AppRecommendationsRoute
+  AppSelfcareRoute: typeof AppSelfcareRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAnalyticsRoute: AppAnalyticsRoute,
+  AppEntryRoute: AppEntryRoute,
+  AppHeatmapRoute: AppHeatmapRoute,
+  AppHistoryRoute: AppHistoryRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppRecommendationsRoute: AppRecommendationsRoute,
+  AppSelfcareRoute: AppSelfcareRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  AuthRoute: AuthRoute,
+  OnboardingRoute: OnboardingRoute,
+  WelcomeRoute: WelcomeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

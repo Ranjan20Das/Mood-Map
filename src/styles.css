@@ -192,3 +192,39 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+/* Mood slider custom styling */
+.mood-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--color-muted);
+  outline: none;
+}
+
+.mood-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  box-shadow: 0 2px 8px color-mix(in oklab, var(--primary) 40%, transparent);
+  transition: transform 0.15s ease;
+}
+
+.mood-slider::-webkit-slider-thumb:active {
+  transform: scale(1.15);
+}
+
+.mood-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 8px color-mix(in oklab, var(--primary) 40%, transparent);
+}

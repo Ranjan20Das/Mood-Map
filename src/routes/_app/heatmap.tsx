@@ -3,6 +3,7 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMoodEntries } from "@/hooks/useMoodEntries";
+import { useHydrated } from "@/hooks/useHydrated";
 import { cn } from "@/lib/utils";
 import { getMoodColorClass, MOOD_EMOJIS, getMoodCategory } from "@/types/mood";
 import type { MoodEntry } from "@/types/mood";

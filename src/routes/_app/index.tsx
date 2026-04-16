@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Smile, TrendingUp, Lightbulb, PenLine } from "lucide-react";
 import { useMoodEntries } from "@/hooks/useMoodEntries";
+import { useHydrated } from "@/hooks/useHydrated";
 import { MoodHeatmapMini } from "@/components/mood/MoodHeatmapMini";
 import { RecentEntries } from "@/components/mood/RecentEntries";
 import { MOOD_EMOJIS } from "@/types/mood";
@@ -29,14 +30,21 @@ const TIPS = [
 ];
 
 function DashboardPage() {
+  const hydrated = useHydrated();
   const { entries, isLoaded, getRecentEntries, getAverageMood } = useMoodEntries();
-  const recent = getRecentEntries(5);
-  const avgMood = getAverageMood(7);
-  const todayTip = TIPS[new Date().getDate() % TIPS.length];
 
-  const greetingHour = new Date().getHours();
-  const greeting =
-    greetingHour < 12 ? "Good morning" : greetingHour < 17 ? "Good afternoon" : "Good evening";
+  // All date/localStorage dependent values guarded by hydration
+  const recent = hydrated ? getRecentEntries(5) : [];
+  const avgMood = hydrated ? getAverageMood(7) : null;
+  const todayTip = hydrated ? TIPS[new Date().getDate() % TIPS.length] : TIPS[0];
+
+  const greeting = hydrated
+    ? new Date().getHours() < 12
+      ? "Good morning"
+      : new Date().getHours() < 17
+        ? "Good afternoon"
+        : "Good evening"
+    : "Welcome";
 
   return (
     <div className="px-4 py-6 space-y-6">
@@ -52,7 +60,7 @@ function DashboardPage() {
           {greeting} 👋
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {isLoaded && entries.length > 0
+          {hydrated && isLoaded && entries.length > 0
             ? `You've logged ${entries.length} mood${entries.length !== 1 ? "s" : ""}`
             : "Start tracking to see your patterns"}
         </p>
@@ -78,13 +86,13 @@ function DashboardPage() {
             <p className="text-xs text-muted-foreground">How are you feeling right now?</p>
           </div>
           <span className="text-2xl">
-            {avgMood ? MOOD_EMOJIS[Math.round(avgMood)] : "😊"}
+            {hydrated && avgMood ? MOOD_EMOJIS[Math.round(avgMood)] : "😊"}
           </span>
         </Link>
       </motion.div>
 
       {/* Weekly Average */}
-      {avgMood !== null && (
+      {hydrated && avgMood !== null && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -106,25 +114,27 @@ function DashboardPage() {
       )}
 
       {/* Heatmap Preview */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.15 }}
-        className="rounded-2xl border bg-card p-5"
-      >
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="font-heading text-sm font-semibold text-foreground">
-            Mood Map
-          </h3>
-          <Link
-            to="/heatmap"
-            className="text-xs font-medium text-primary hover:underline"
-          >
-            View Full Map
-          </Link>
-        </div>
-        <MoodHeatmapMini entries={entries} />
-      </motion.div>
+      {hydrated && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.15 }}
+          className="rounded-2xl border bg-card p-5"
+        >
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="font-heading text-sm font-semibold text-foreground">
+              Mood Map
+            </h3>
+            <Link
+              to="/heatmap"
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              View Full Map
+            </Link>
+          </div>
+          <MoodHeatmapMini entries={entries} />
+        </motion.div>
+      )}
 
       {/* Daily Tip */}
       <motion.div
@@ -145,16 +155,18 @@ function DashboardPage() {
       </motion.div>
 
       {/* Recent Entries */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.25 }}
-      >
-        <h3 className="mb-3 font-heading text-sm font-semibold text-foreground">
-          Recent Entries
-        </h3>
-        <RecentEntries entries={recent} />
-      </motion.div>
+      {hydrated && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.25 }}
+        >
+          <h3 className="mb-3 font-heading text-sm font-semibold text-foreground">
+            Recent Entries
+          </h3>
+          <RecentEntries entries={recent} />
+        </motion.div>
+      )}
     </div>
   );
 }

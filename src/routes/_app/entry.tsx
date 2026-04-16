@@ -6,6 +6,7 @@ import { MoodScale } from "@/components/mood/MoodScale";
 import { TagSelector } from "@/components/mood/TagSelector";
 import { VoiceRecorder } from "@/components/mood/VoiceRecorder";
 import { useMoodEntries } from "@/hooks/useMoodEntries";
+import { useHydrated } from "@/hooks/useHydrated";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/entry")({
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/_app/entry")({
 });
 
 function EntryPage() {
+  const hydrated = useHydrated();
   const navigate = useNavigate();
   const { addEntry } = useMoodEntries();
 
@@ -35,7 +37,6 @@ function EntryPage() {
     const today = new Date().toISOString().split("T")[0];
     addEntry({ date: today, mood, journal, tags, voiceNote });
 
-    // Brief delay for animation
     setTimeout(() => {
       toast.success("Mood logged! 🎉", {
         description: `You're feeling ${mood}/10 today`,
@@ -43,6 +44,14 @@ function EntryPage() {
       navigate({ to: "/" });
     }, 300);
   };
+
+  const dateLabel = hydrated
+    ? new Date().toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+      })
+    : "";
 
   return (
     <div className="px-4 py-6">
@@ -52,26 +61,17 @@ function EntryPage() {
         transition={{ duration: 0.4 }}
         className="space-y-8"
       >
-        {/* Header */}
         <div>
           <h2 className="font-heading text-2xl font-bold text-foreground">
             How are you feeling?
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            })}
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">{dateLabel}</p>
         </div>
 
-        {/* Mood Scale */}
         <div className="rounded-2xl border bg-card p-5">
           <MoodScale value={mood} onChange={setMood} />
         </div>
 
-        {/* Journal */}
         <div className="space-y-2">
           <label htmlFor="journal" className="text-sm font-medium text-foreground">
             Journal
@@ -89,13 +89,9 @@ function EntryPage() {
           </p>
         </div>
 
-        {/* Voice Recorder */}
         <VoiceRecorder onRecordingComplete={setVoiceNote} />
-
-        {/* Tags */}
         <TagSelector selected={tags} onChange={setTags} />
 
-        {/* Save Button */}
         <motion.button
           onClick={handleSave}
           disabled={isSaving}

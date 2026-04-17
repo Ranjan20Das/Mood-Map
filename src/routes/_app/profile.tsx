@@ -134,12 +134,54 @@ function ProfilePage() {
         className="rounded-2xl border bg-card p-5"
       >
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-            <User className="h-7 w-7 text-primary" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 overflow-hidden">
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <User className="h-7 w-7 text-primary" />
+            )}
           </div>
-          <div>
-            <h3 className="font-heading text-base font-semibold text-foreground">MoodMap User</h3>
-            <p className="text-xs text-muted-foreground">Sign in to sync your data (Phase 4)</p>
+          <div className="flex-1 min-w-0">
+            {editingName ? (
+              <div className="flex items-center gap-2">
+                <input
+                  value={nameDraft}
+                  onChange={(e) => setNameDraft(e.target.value)}
+                  className="h-8 flex-1 rounded-lg border border-input bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  placeholder="Display name"
+                  autoFocus
+                />
+                <button
+                  onClick={saveDisplayName}
+                  disabled={savingName}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground disabled:opacity-50"
+                  aria-label="Save name"
+                >
+                  <Check className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => { setEditingName(false); setNameDraft(profile?.display_name ?? ""); }}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-input text-foreground"
+                  aria-label="Cancel"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <h3 className="font-heading text-base font-semibold text-foreground truncate">
+                  {profile?.display_name || user?.email?.split("@")[0] || "MoodMap User"}
+                </h3>
+                <button
+                  onClick={() => setEditingName(true)}
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label="Edit name"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+            <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
           </div>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3">

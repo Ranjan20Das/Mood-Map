@@ -1,11 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-  User, Moon, Sun, Bell, BellOff, Download, Shield, ChevronRight, LogOut, Palette,
+  User, Moon, Sun, Bell, BellOff, Download, Shield, ChevronRight, LogOut, Palette, Pencil, Check, X,
 } from "lucide-react";
 import { useMoodEntries } from "@/hooks/useMoodEntries";
 import { useHydrated } from "@/hooks/useHydrated";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -23,10 +25,15 @@ export const Route = createFileRoute("/_app/profile")({
 
 function ProfilePage() {
   const hydrated = useHydrated();
+  const navigate = useNavigate();
   const { entries } = useMoodEntries();
+  const { user, profile, signOut, refreshProfile } = useAuth();
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [reminderTime, setReminderTime] = useState("20:00");
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState("");
+  const [savingName, setSavingName] = useState(false);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -37,6 +44,33 @@ function ProfilePage() {
     const savedTime = localStorage.getItem("moodmap_reminder_time");
     if (savedTime) setReminderTime(savedTime);
   }, [hydrated]);
+
+  useEffect(() => {
+    setNameDraft(profile?.display_name ?? "");
+  }, [profile]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Signed out");
+    navigate({ to: "/auth" });
+  };
+
+  const saveDisplayName = async () => {
+    if (!user) return;
+    setSavingName(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ display_name: nameDraft.trim() || null })
+      .eq("user_id", user.id);
+    setSavingName(false);
+    if (error) {
+      toast.error("Failed to update name");
+      return;
+    }
+    await refreshProfile();
+    setEditingName(false);
+    toast.success("Display name updated");
+  };
 
   const toggleDarkMode = () => {
     const newVal = !darkMode;

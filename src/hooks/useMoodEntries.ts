@@ -135,7 +135,13 @@ export function useMoodEntries() {
   const updateEntry = useCallback(
     async (id: string, updates: Partial<MoodEntry>) => {
       if (!user) return;
-      const dbUpdates: Record<string, unknown> = {};
+      const dbUpdates: {
+        mood?: number;
+        journal?: string | null;
+        tags?: string[];
+        voice_url?: string | null;
+        entry_date?: string;
+      } = {};
       if (updates.mood !== undefined) dbUpdates.mood = updates.mood;
       if (updates.journal !== undefined) dbUpdates.journal = updates.journal || null;
       if (updates.tags !== undefined) dbUpdates.tags = updates.tags;

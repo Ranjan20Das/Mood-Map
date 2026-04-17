@@ -289,16 +289,30 @@ function ProfilePage() {
         <SettingRow
           icon={<Shield className="h-5 w-5" />}
           label="Privacy"
-          description="Your data is stored locally on this device"
+          description="Your data is encrypted and synced to your account"
           action={<ChevronRight className="h-4 w-4 text-muted-foreground" />}
         />
+      </Section>
+
+      {/* Account */}
+      <Section title="Account" delay={0.23}>
+        <button
+          onClick={handleSignOut}
+          className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted"
+        >
+          <div className="text-destructive"><LogOut className="h-5 w-5" /></div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-destructive">Sign Out</p>
+            <p className="text-[11px] text-muted-foreground">End your current session</p>
+          </div>
+        </button>
       </Section>
 
       {/* About */}
       <Section title="About" delay={0.25}>
         <div className="px-4 py-3">
           <p className="text-sm text-foreground font-medium">MoodMap</p>
-          <p className="text-xs text-muted-foreground">Version 1.0.0 · Phase 3</p>
+          <p className="text-xs text-muted-foreground">Version 1.0.0 · Phase 4</p>
           <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
             AI-powered mood tracking with visual insights, personalized recommendations, and self-care resources.
           </p>

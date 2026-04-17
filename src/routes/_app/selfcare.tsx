@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart, Search, Phone, ExternalLink, Bookmark, BookmarkCheck, Sparkles,
@@ -71,14 +71,13 @@ function SelfCarePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
-  // Load favorites from localStorage
-  useState(() => {
-    if (typeof window === "undefined") return;
+  useEffect(() => {
+    if (typeof localStorage === "undefined") return;
     try {
       const saved = localStorage.getItem("moodmap_selfcare_favorites");
       if (saved) setFavorites(new Set(JSON.parse(saved)));
     } catch {}
-  });
+  }, []);
 
   const toggleFavorite = (id: string) => {
     setFavorites((prev) => {

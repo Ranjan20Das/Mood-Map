@@ -1,11 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-  User, Moon, Sun, Bell, BellOff, Download, Shield, ChevronRight, LogOut, Palette,
+  User, Moon, Sun, Bell, BellOff, Download, Shield, ChevronRight, LogOut, Palette, Pencil, Check, X,
 } from "lucide-react";
 import { useMoodEntries } from "@/hooks/useMoodEntries";
 import { useHydrated } from "@/hooks/useHydrated";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -23,10 +25,15 @@ export const Route = createFileRoute("/_app/profile")({
 
 function ProfilePage() {
   const hydrated = useHydrated();
+  const navigate = useNavigate();
   const { entries } = useMoodEntries();
+  const { user, profile, signOut, refreshProfile } = useAuth();
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [reminderTime, setReminderTime] = useState("20:00");
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState("");
+  const [savingName, setSavingName] = useState(false);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -37,6 +44,33 @@ function ProfilePage() {
     const savedTime = localStorage.getItem("moodmap_reminder_time");
     if (savedTime) setReminderTime(savedTime);
   }, [hydrated]);
+
+  useEffect(() => {
+    setNameDraft(profile?.display_name ?? "");
+  }, [profile]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Signed out");
+    navigate({ to: "/auth" });
+  };
+
+  const saveDisplayName = async () => {
+    if (!user) return;
+    setSavingName(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ display_name: nameDraft.trim() || null })
+      .eq("user_id", user.id);
+    setSavingName(false);
+    if (error) {
+      toast.error("Failed to update name");
+      return;
+    }
+    await refreshProfile();
+    setEditingName(false);
+    toast.success("Display name updated");
+  };
 
   const toggleDarkMode = () => {
     const newVal = !darkMode;
@@ -100,12 +134,54 @@ function ProfilePage() {
         className="rounded-2xl border bg-card p-5"
       >
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-            <User className="h-7 w-7 text-primary" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 overflow-hidden">
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <User className="h-7 w-7 text-primary" />
+            )}
           </div>
-          <div>
-            <h3 className="font-heading text-base font-semibold text-foreground">MoodMap User</h3>
-            <p className="text-xs text-muted-foreground">Sign in to sync your data (Phase 4)</p>
+          <div className="flex-1 min-w-0">
+            {editingName ? (
+              <div className="flex items-center gap-2">
+                <input
+                  value={nameDraft}
+                  onChange={(e) => setNameDraft(e.target.value)}
+                  className="h-8 flex-1 rounded-lg border border-input bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  placeholder="Display name"
+                  autoFocus
+                />
+                <button
+                  onClick={saveDisplayName}
+                  disabled={savingName}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground disabled:opacity-50"
+                  aria-label="Save name"
+                >
+                  <Check className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => { setEditingName(false); setNameDraft(profile?.display_name ?? ""); }}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-input text-foreground"
+                  aria-label="Cancel"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <h3 className="font-heading text-base font-semibold text-foreground truncate">
+                  {profile?.display_name || user?.email?.split("@")[0] || "MoodMap User"}
+                </h3>
+                <button
+                  onClick={() => setEditingName(true)}
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label="Edit name"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+            <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
           </div>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3">
@@ -213,16 +289,30 @@ function ProfilePage() {
         <SettingRow
           icon={<Shield className="h-5 w-5" />}
           label="Privacy"
-          description="Your data is stored locally on this device"
+          description="Your data is encrypted and synced to your account"
           action={<ChevronRight className="h-4 w-4 text-muted-foreground" />}
         />
+      </Section>
+
+      {/* Account */}
+      <Section title="Account" delay={0.23}>
+        <button
+          onClick={handleSignOut}
+          className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted"
+        >
+          <div className="text-destructive"><LogOut className="h-5 w-5" /></div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-destructive">Sign Out</p>
+            <p className="text-[11px] text-muted-foreground">End your current session</p>
+          </div>
+        </button>
       </Section>
 
       {/* About */}
       <Section title="About" delay={0.25}>
         <div className="px-4 py-3">
           <p className="text-sm text-foreground font-medium">MoodMap</p>
-          <p className="text-xs text-muted-foreground">Version 1.0.0 · Phase 3</p>
+          <p className="text-xs text-muted-foreground">Version 1.0.0 · Phase 4</p>
           <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
             AI-powered mood tracking with visual insights, personalized recommendations, and self-care resources.
           </p>

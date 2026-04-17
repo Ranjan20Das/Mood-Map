@@ -32,17 +32,19 @@ function EntryPage() {
   const [voiceNote, setVoiceNote] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsSaving(true);
     const today = new Date().toISOString().split("T")[0];
-    addEntry({ date: today, mood, journal, tags, voiceNote });
-
-    setTimeout(() => {
+    try {
+      await addEntry({ date: today, mood, journal, tags, voiceNote });
       toast.success("Mood logged! 🎉", {
         description: `You're feeling ${mood}/10 today`,
       });
       navigate({ to: "/" });
-    }, 300);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save entry");
+      setIsSaving(false);
+    }
   };
 
   const dateLabel = hydrated

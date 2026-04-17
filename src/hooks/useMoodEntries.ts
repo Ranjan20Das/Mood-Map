@@ -1,59 +1,162 @@
 import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import type { MoodEntry } from "@/types/mood";
 
-const STORAGE_KEY = "moodmap_entries";
+const LEGACY_STORAGE_KEY = "moodmap_entries";
+const MIGRATION_FLAG_KEY = "moodmap_migrated_v1";
 
-function loadEntries(): MoodEntry[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
+interface DbRow {
+  id: string;
+  user_id: string;
+  mood: number;
+  journal: string | null;
+  tags: string[] | null;
+  voice_url: string | null;
+  entry_date: string;
+  created_at: string;
 }
 
-function saveEntries(entries: MoodEntry[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+function rowToEntry(row: DbRow): MoodEntry {
+  return {
+    id: row.id,
+    date: row.entry_date,
+    mood: row.mood,
+    journal: row.journal ?? "",
+    tags: row.tags ?? [],
+    voiceNote: row.voice_url ?? undefined,
+    createdAt: row.created_at,
+  };
 }
 
 export function useMoodEntries() {
+  const { user } = useAuth();
   const [entries, setEntries] = useState<MoodEntry[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const fetchEntries = useCallback(async (userId: string) => {
+    const { data, error } = await supabase
+      .from("mood_entries")
+      .select("*")
+      .eq("user_id", userId)
+      .order("entry_date", { ascending: false })
+      .order("created_at", { ascending: false });
+    if (error) {
+      console.error("Failed to fetch mood entries:", error);
+      return;
+    }
+    setEntries((data ?? []).map(rowToEntry));
+  }, []);
+
+  // Migrate localStorage entries to Supabase once per user
+  const migrateLegacy = useCallback(async (userId: string) => {
+    if (typeof window === "undefined") return;
+    const flagKey = `${MIGRATION_FLAG_KEY}_${userId}`;
+    if (localStorage.getItem(flagKey)) return;
+    try {
+      const raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (!raw) {
+        localStorage.setItem(flagKey, "1");
+        return;
+      }
+      const legacy: MoodEntry[] = JSON.parse(raw);
+      if (!Array.isArray(legacy) || legacy.length === 0) {
+        localStorage.setItem(flagKey, "1");
+        return;
+      }
+      const rows = legacy.map((e) => ({
+        user_id: userId,
+        mood: e.mood,
+        journal: e.journal || null,
+        tags: e.tags ?? [],
+        voice_url: e.voiceNote ?? null,
+        entry_date: e.date,
+      }));
+      const { error } = await supabase.from("mood_entries").insert(rows);
+      if (!error) {
+        localStorage.setItem(flagKey, "1");
+        // Keep legacy data for safety; don't delete
+      }
+    } catch (err) {
+      console.error("Migration failed:", err);
+    }
+  }, []);
+
   useEffect(() => {
-    setEntries(loadEntries());
-    setIsLoaded(true);
-  }, []);
+    if (!user) {
+      setEntries([]);
+      setIsLoaded(true);
+      return;
+    }
+    setIsLoaded(false);
+    (async () => {
+      await migrateLegacy(user.id);
+      await fetchEntries(user.id);
+      setIsLoaded(true);
+    })();
+  }, [user, fetchEntries, migrateLegacy]);
 
-  const addEntry = useCallback((entry: Omit<MoodEntry, "id" | "createdAt">) => {
-    const newEntry: MoodEntry = {
-      ...entry,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-    };
-    setEntries((prev) => {
-      const updated = [newEntry, ...prev];
-      saveEntries(updated);
-      return updated;
-    });
-    return newEntry;
-  }, []);
+  const addEntry = useCallback(
+    async (entry: Omit<MoodEntry, "id" | "createdAt">) => {
+      if (!user) throw new Error("Not signed in");
+      const { data, error } = await supabase
+        .from("mood_entries")
+        .insert({
+          user_id: user.id,
+          mood: entry.mood,
+          journal: entry.journal || null,
+          tags: entry.tags ?? [],
+          voice_url: entry.voiceNote ?? null,
+          entry_date: entry.date,
+        })
+        .select()
+        .single();
+      if (error || !data) throw error ?? new Error("Insert failed");
+      const newEntry = rowToEntry(data as DbRow);
+      setEntries((prev) => [newEntry, ...prev]);
+      return newEntry;
+    },
+    [user]
+  );
 
-  const deleteEntry = useCallback((id: string) => {
-    setEntries((prev) => {
-      const updated = prev.filter((e) => e.id !== id);
-      saveEntries(updated);
-      return updated;
-    });
-  }, []);
+  const deleteEntry = useCallback(
+    async (id: string) => {
+      if (!user) return;
+      const { error } = await supabase.from("mood_entries").delete().eq("id", id);
+      if (error) {
+        console.error(error);
+        return;
+      }
+      setEntries((prev) => prev.filter((e) => e.id !== id));
+    },
+    [user]
+  );
 
-  const updateEntry = useCallback((id: string, updates: Partial<MoodEntry>) => {
-    setEntries((prev) => {
-      const updated = prev.map((e) => (e.id === id ? { ...e, ...updates } : e));
-      saveEntries(updated);
-      return updated;
-    });
-  }, []);
+  const updateEntry = useCallback(
+    async (id: string, updates: Partial<MoodEntry>) => {
+      if (!user) return;
+      const dbUpdates: {
+        mood?: number;
+        journal?: string | null;
+        tags?: string[];
+        voice_url?: string | null;
+        entry_date?: string;
+      } = {};
+      if (updates.mood !== undefined) dbUpdates.mood = updates.mood;
+      if (updates.journal !== undefined) dbUpdates.journal = updates.journal || null;
+      if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
+      if (updates.voiceNote !== undefined) dbUpdates.voice_url = updates.voiceNote ?? null;
+      if (updates.date !== undefined) dbUpdates.entry_date = updates.date;
+
+      const { error } = await supabase.from("mood_entries").update(dbUpdates).eq("id", id);
+      if (error) {
+        console.error(error);
+        return;
+      }
+      setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, ...updates } : e)));
+    },
+    [user]
+  );
 
   const getEntriesByDate = useCallback(
     (date: string) => entries.filter((e) => e.date === date),

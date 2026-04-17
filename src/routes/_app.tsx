@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -28,6 +28,3 @@ function ProtectedAppLayout() {
 
   return <AppLayout />;
 }
-
-// Keep AppLayout's <Outlet /> usable
-export { Outlet };

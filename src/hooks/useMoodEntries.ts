@@ -94,6 +94,31 @@ export function useMoodEntries() {
       await fetchEntries(user.id);
       setIsLoaded(true);
     })();
+
+    // Realtime sync across devices/tabs
+    const channel = supabase
+      .channel(`mood_entries:${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "mood_entries", filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            const newEntry = rowToEntry(payload.new as DbRow);
+            setEntries((prev) => (prev.some((e) => e.id === newEntry.id) ? prev : [newEntry, ...prev]));
+          } else if (payload.eventType === "UPDATE") {
+            const updated = rowToEntry(payload.new as DbRow);
+            setEntries((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
+          } else if (payload.eventType === "DELETE") {
+            const oldId = (payload.old as { id?: string })?.id;
+            if (oldId) setEntries((prev) => prev.filter((e) => e.id !== oldId));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user, fetchEntries, migrateLegacy]);
 
   const addEntry = useCallback(

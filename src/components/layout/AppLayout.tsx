@@ -2,6 +2,7 @@ import { Outlet } from "@tanstack/react-router";
 import { BottomTabBar } from "./BottomTabBar";
 import { FloatingActionButton } from "./FloatingActionButton";
 import { HamburgerMenu } from "./HamburgerMenu";
+import { OfflineIndicator } from "./OfflineIndicator";
 
 export function AppLayout() {
   return (
@@ -9,7 +10,10 @@ export function AppLayout() {
       {/* Top Bar */}
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b bg-card/80 px-4 backdrop-blur-lg">
         <HamburgerMenu />
-        <h1 className="font-heading text-lg font-bold text-primary">MoodMap</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="font-heading text-lg font-bold text-primary">MoodMap</h1>
+          <OfflineIndicator />
+        </div>
         <div className="w-10" /> {/* Spacer for centering */}
       </header>
 
@@ -24,3 +28,4 @@ export function AppLayout() {
     </div>
   );
 }
+

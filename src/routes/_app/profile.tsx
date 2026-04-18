@@ -29,26 +29,29 @@ function ProfilePage() {
   const navigate = useNavigate();
   const { entries } = useMoodEntries();
   const { user, profile, signOut, refreshProfile } = useAuth();
+  const { preferences, updatePreferences } = useUserPreferences();
   const [darkMode, setDarkMode] = useState(false);
-  const [notifications, setNotifications] = useState(true);
-  const [reminderTime, setReminderTime] = useState("20:00");
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
   const [savingName, setSavingName] = useState(false);
 
+  // Sync theme with preferences
   useEffect(() => {
-    if (!hydrated) return;
-    const isDark = document.documentElement.classList.contains("dark");
+    if (!hydrated || !preferences) return;
+    const isDark =
+      preferences.theme === "dark" ||
+      (preferences.theme === "system" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
     setDarkMode(isDark);
-    const savedNotif = localStorage.getItem("moodmap_notifications");
-    if (savedNotif !== null) setNotifications(savedNotif === "true");
-    const savedTime = localStorage.getItem("moodmap_reminder_time");
-    if (savedTime) setReminderTime(savedTime);
-  }, [hydrated]);
+    document.documentElement.classList.toggle("dark", isDark);
+  }, [hydrated, preferences]);
 
   useEffect(() => {
     setNameDraft(profile?.display_name ?? "");
   }, [profile]);
+
+  const notifications = preferences?.notifications_enabled ?? true;
+  const reminderTime = (preferences?.reminder_time ?? "20:00:00").slice(0, 5);
 
   const handleSignOut = async () => {
     await signOut();
@@ -73,19 +76,34 @@ function ProfilePage() {
     toast.success("Display name updated");
   };
 
-  const toggleDarkMode = () => {
+  const toggleDarkMode = async () => {
     const newVal = !darkMode;
     setDarkMode(newVal);
     document.documentElement.classList.toggle("dark", newVal);
-    localStorage.setItem("moodmap_darkmode", String(newVal));
+    await updatePreferences({ theme: newVal ? "dark" : "light" });
     toast.success(newVal ? "Dark mode enabled 🌙" : "Light mode enabled ☀️");
   };
 
-  const toggleNotifications = () => {
+  const toggleNotifications = async () => {
     const newVal = !notifications;
-    setNotifications(newVal);
-    localStorage.setItem("moodmap_notifications", String(newVal));
+    if (newVal && typeof Notification !== "undefined" && Notification.permission === "default") {
+      try {
+        const result = await Notification.requestPermission();
+        if (result !== "granted") {
+          toast.error("Notification permission denied by browser");
+          await updatePreferences({ notifications_enabled: false });
+          return;
+        }
+      } catch {
+        // ignore
+      }
+    }
+    await updatePreferences({ notifications_enabled: newVal });
     toast.success(newVal ? "Reminders enabled" : "Reminders disabled");
+  };
+
+  const handleReminderTimeChange = async (time: string) => {
+    await updatePreferences({ reminder_time: `${time}:00` });
   };
 
   const handleExportJSON = () => {

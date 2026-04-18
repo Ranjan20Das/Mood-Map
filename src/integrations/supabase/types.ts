@@ -50,6 +50,39 @@ export type Database = {
         }
         Relationships: []
       }
+      mood_tags: {
+        Row: {
+          color: string | null
+          created_at: string
+          icon: string | null
+          id: string
+          is_default: boolean
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_default?: boolean
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_default?: boolean
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -77,6 +110,48 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          created_at: string
+          default_tags: string[]
+          id: string
+          language: string
+          notifications_enabled: boolean
+          reminder_enabled: boolean
+          reminder_time: string
+          theme: string
+          updated_at: string
+          user_id: string
+          week_start_day: number
+        }
+        Insert: {
+          created_at?: string
+          default_tags?: string[]
+          id?: string
+          language?: string
+          notifications_enabled?: boolean
+          reminder_enabled?: boolean
+          reminder_time?: string
+          theme?: string
+          updated_at?: string
+          user_id: string
+          week_start_day?: number
+        }
+        Update: {
+          created_at?: string
+          default_tags?: string[]
+          id?: string
+          language?: string
+          notifications_enabled?: boolean
+          reminder_enabled?: boolean
+          reminder_time?: string
+          theme?: string
+          updated_at?: string
+          user_id?: string
+          week_start_day?: number
         }
         Relationships: []
       }

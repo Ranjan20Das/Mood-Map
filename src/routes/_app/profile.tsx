@@ -7,6 +7,7 @@ import {
 import { useMoodEntries } from "@/hooks/useMoodEntries";
 import { useHydrated } from "@/hooks/useHydrated";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -253,10 +254,7 @@ function ProfilePage() {
               <input
                 type="time"
                 value={reminderTime}
-                onChange={(e) => {
-                  setReminderTime(e.target.value);
-                  localStorage.setItem("moodmap_reminder_time", e.target.value);
-                }}
+                onChange={(e) => handleReminderTimeChange(e.target.value)}
                 className="rounded-lg border bg-background px-2 py-1 text-xs text-foreground"
               />
             }
@@ -312,7 +310,7 @@ function ProfilePage() {
       <Section title="About" delay={0.25}>
         <div className="px-4 py-3">
           <p className="text-sm text-foreground font-medium">MoodMap</p>
-          <p className="text-xs text-muted-foreground">Version 1.0.0 · Phase 4</p>
+          <p className="text-xs text-muted-foreground">Version 1.0.0 · Phase 6</p>
           <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
             AI-powered mood tracking with visual insights, personalized recommendations, and self-care resources.
           </p>

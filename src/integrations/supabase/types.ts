@@ -14,8 +14,43 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_recommendations: {
+        Row: {
+          avg_mood: number | null
+          based_on_entry_ids: string[] | null
+          created_at: string
+          id: string
+          kind: string
+          payload: Json
+          user_id: string
+        }
+        Insert: {
+          avg_mood?: number | null
+          based_on_entry_ids?: string[] | null
+          created_at?: string
+          id?: string
+          kind: string
+          payload: Json
+          user_id: string
+        }
+        Update: {
+          avg_mood?: number | null
+          based_on_entry_ids?: string[] | null
+          created_at?: string
+          id?: string
+          kind?: string
+          payload?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       mood_entries: {
         Row: {
+          ai_analyzed_at: string | null
+          ai_emotions: string[] | null
+          ai_sentiment: number | null
+          ai_summary: string | null
+          ai_themes: string[] | null
           created_at: string
           entry_date: string
           id: string
@@ -27,6 +62,11 @@ export type Database = {
           voice_url: string | null
         }
         Insert: {
+          ai_analyzed_at?: string | null
+          ai_emotions?: string[] | null
+          ai_sentiment?: number | null
+          ai_summary?: string | null
+          ai_themes?: string[] | null
           created_at?: string
           entry_date?: string
           id?: string
@@ -38,6 +78,11 @@ export type Database = {
           voice_url?: string | null
         }
         Update: {
+          ai_analyzed_at?: string | null
+          ai_emotions?: string[] | null
+          ai_sentiment?: number | null
+          ai_summary?: string | null
+          ai_themes?: string[] | null
           created_at?: string
           entry_date?: string
           id?: string

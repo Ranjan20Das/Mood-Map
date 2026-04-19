@@ -89,7 +89,7 @@ Deno.test({ name: "analyze-mood: rejects unauthenticated requests", sanitizeReso
     body: JSON.stringify({ entryId: "x", mood: 5 }),
   }));
   assertEquals(res.status, 401);
-});}
+} });
 
 Deno.test({ name: "analyze-mood: returns analysis on success", sanitizeResources: false, sanitizeOps: false, fn: async () => {
   Deno.env.set("LOVABLE_API_KEY", "test-key");
@@ -114,7 +114,7 @@ Deno.test({ name: "analyze-mood: returns analysis on success", sanitizeResources
   } finally {
     restore();
   }
-});}
+} });
 
 Deno.test({ name: "analyze-mood: surfaces 429 from gateway", sanitizeResources: false, sanitizeOps: false, fn: async () => {
   Deno.env.set("LOVABLE_API_KEY", "test-key");
@@ -131,11 +131,11 @@ Deno.test({ name: "analyze-mood: surfaces 429 from gateway", sanitizeResources: 
   } finally {
     restore();
   }
-});}
+} });
 
 Deno.test({ name: "analyze-mood: handles CORS preflight", sanitizeResources: false, sanitizeOps: false, fn: async () => {
   const handler = await loadHandler();
   const res = await handler(new Request(FUNCTION_URL, { method: "OPTIONS" }));
   assertEquals(res.status, 200);
   assertEquals(res.headers.get("Access-Control-Allow-Origin"), "*");
-});}
+} });

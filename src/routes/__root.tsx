@@ -37,6 +37,12 @@ export const Route = createRootRoute({
       { name: "theme-color", content: "#6366F1" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { property: "og:title", content: "MoodMap — Track Your Emotional Well-being" },
+      { name: "twitter:title", content: "MoodMap — Track Your Emotional Well-being" },
+      { property: "og:description", content: "AI-powered mood tracking with visual insights, personalized recommendations, and self-care resources." },
+      { name: "twitter:description", content: "AI-powered mood tracking with visual insights, personalized recommendations, and self-care resources." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/9d334241-b716-4a12-b6eb-c287ea941d03/id-preview-f63e9505--5dcd0f5e-cedf-4cc1-b157-7eca3b404a32.lovable.app-1776611345051.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/9d334241-b716-4a12-b6eb-c287ea941d03/id-preview-f63e9505--5dcd0f5e-cedf-4cc1-b157-7eca3b404a32.lovable.app-1776611345051.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

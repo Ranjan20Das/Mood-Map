@@ -23,6 +23,11 @@ interface DbRow {
   voice_url: string | null;
   entry_date: string;
   created_at: string;
+  ai_emotions?: string[] | null;
+  ai_sentiment?: number | null;
+  ai_themes?: string[] | null;
+  ai_summary?: string | null;
+  ai_analyzed_at?: string | null;
 }
 
 function rowToEntry(row: DbRow): MoodEntry {
@@ -34,6 +39,11 @@ function rowToEntry(row: DbRow): MoodEntry {
     tags: row.tags ?? [],
     voiceNote: row.voice_url ?? undefined,
     createdAt: row.created_at,
+    aiEmotions: row.ai_emotions ?? undefined,
+    aiSentiment: row.ai_sentiment ?? undefined,
+    aiThemes: row.ai_themes ?? undefined,
+    aiSummary: row.ai_summary ?? undefined,
+    aiAnalyzedAt: row.ai_analyzed_at ?? undefined,
   };
 }
 

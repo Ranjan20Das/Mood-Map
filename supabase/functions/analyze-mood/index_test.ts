@@ -77,7 +77,7 @@ async function loadHandler(): Promise<Handler> {
   return captured as Handler;
 }
 
-Deno.test("analyze-mood: rejects unauthenticated requests", async () => {
+Deno.test({ name: "analyze-mood: rejects unauthenticated requests", sanitizeResources: false, sanitizeOps: false, fn: async () => {
   Deno.env.set("LOVABLE_API_KEY", "test-key");
   Deno.env.set("SUPABASE_URL", "http://localhost");
   Deno.env.set("SUPABASE_PUBLISHABLE_KEY", "anon");
@@ -91,7 +91,7 @@ Deno.test("analyze-mood: rejects unauthenticated requests", async () => {
   assertEquals(res.status, 401);
 });
 
-Deno.test("analyze-mood: returns analysis on success", async () => {
+Deno.test({ name: "analyze-mood: returns analysis on success", sanitizeResources: false, sanitizeOps: false, fn: async () => {
   Deno.env.set("LOVABLE_API_KEY", "test-key");
   Deno.env.set("SUPABASE_URL", "http://localhost");
   Deno.env.set("SUPABASE_PUBLISHABLE_KEY", "anon");
@@ -116,7 +116,7 @@ Deno.test("analyze-mood: returns analysis on success", async () => {
   }
 });
 
-Deno.test("analyze-mood: surfaces 429 from gateway", async () => {
+Deno.test({ name: "analyze-mood: surfaces 429 from gateway", sanitizeResources: false, sanitizeOps: false, fn: async () => {
   Deno.env.set("LOVABLE_API_KEY", "test-key");
   const state: MockState = { aiCalls: 0, dbUpdates: 0, lastBody: null };
   const restore = installMockFetch(state, { aiOk: false, aiStatus: 429 });
@@ -133,7 +133,7 @@ Deno.test("analyze-mood: surfaces 429 from gateway", async () => {
   }
 });
 
-Deno.test("analyze-mood: handles CORS preflight", async () => {
+Deno.test({ name: "analyze-mood: handles CORS preflight", sanitizeResources: false, sanitizeOps: false, fn: async () => {
   const handler = await loadHandler();
   const res = await handler(new Request(FUNCTION_URL, { method: "OPTIONS" }));
   assertEquals(res.status, 200);

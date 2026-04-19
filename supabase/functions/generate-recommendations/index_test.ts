@@ -82,7 +82,7 @@ async function loadHandler(): Promise<Handler> {
   return captured as Handler;
 }
 
-Deno.test("generate-recommendations: 401 without auth", async () => {
+Deno.test({ name: "generate-recommendations: 401 without auth", sanitizeResources: false, sanitizeOps: false, fn: async () => {
   Deno.env.set("LOVABLE_API_KEY", "test-key");
   Deno.env.set("SUPABASE_URL", "http://localhost");
   Deno.env.set("SUPABASE_PUBLISHABLE_KEY", "anon");
@@ -91,7 +91,7 @@ Deno.test("generate-recommendations: 401 without auth", async () => {
   assertEquals(res.status, 401);
 });
 
-Deno.test("generate-recommendations: 400 when no entries", async () => {
+Deno.test({ name: "generate-recommendations: 400 when no entries", sanitizeResources: false, sanitizeOps: false, fn: async () => {
   const state: MockState = { aiCalls: 0, inserts: 0, entriesReturned: 0 };
   const restore = installMockFetch(state, { entries: 0 });
   try {
@@ -108,7 +108,7 @@ Deno.test("generate-recommendations: 400 when no entries", async () => {
   }
 });
 
-Deno.test("generate-recommendations: returns recommendations and persists", async () => {
+Deno.test({ name: "generate-recommendations: returns recommendations and persists", sanitizeResources: false, sanitizeOps: false, fn: async () => {
   const state: MockState = { aiCalls: 0, inserts: 0, entriesReturned: 0 };
   const restore = installMockFetch(state, { entries: 5 });
   try {

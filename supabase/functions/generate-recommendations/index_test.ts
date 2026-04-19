@@ -89,7 +89,7 @@ Deno.test({ name: "generate-recommendations: 401 without auth", sanitizeResource
   const handler = await loadHandler();
   const res = await handler(new Request(FUNCTION_URL, { method: "POST", body: "{}" }));
   assertEquals(res.status, 401);
-});
+});}
 
 Deno.test({ name: "generate-recommendations: 400 when no entries", sanitizeResources: false, sanitizeOps: false, fn: async () => {
   const state: MockState = { aiCalls: 0, inserts: 0, entriesReturned: 0 };
@@ -106,7 +106,7 @@ Deno.test({ name: "generate-recommendations: 400 when no entries", sanitizeResou
   } finally {
     restore();
   }
-});
+});}
 
 Deno.test({ name: "generate-recommendations: returns recommendations and persists", sanitizeResources: false, sanitizeOps: false, fn: async () => {
   const state: MockState = { aiCalls: 0, inserts: 0, entriesReturned: 0 };
@@ -127,4 +127,4 @@ Deno.test({ name: "generate-recommendations: returns recommendations and persist
   } finally {
     restore();
   }
-});
+});}

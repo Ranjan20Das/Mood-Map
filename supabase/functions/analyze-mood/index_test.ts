@@ -61,19 +61,20 @@ function installMockFetch(state: MockState, opts: { aiOk?: boolean; aiStatus?: n
   return () => { globalThis.fetch = original; };
 }
 
-async function loadHandler() {
-  // Capture the handler registered via Deno.serve
-  let captured: ((req: Request) => Response | Promise<Response>) | null = null;
+type Handler = (req: Request) => Response | Promise<Response>;
+
+async function loadHandler(): Promise<Handler> {
+  let captured: Handler | null = null;
   const origServe = Deno.serve;
   // @ts-ignore — override for capture
-  Deno.serve = (handler: (req: Request) => Response | Promise<Response>) => {
+  Deno.serve = (handler: Handler) => {
     captured = handler;
     return { finished: Promise.resolve(), shutdown: async () => {} } as unknown as ReturnType<typeof Deno.serve>;
   };
   await import(`../analyze-mood/index.ts?t=${Date.now()}`);
   Deno.serve = origServe;
   if (!captured) throw new Error("Handler not registered");
-  return captured;
+  return captured as Handler;
 }
 
 Deno.test("analyze-mood: rejects unauthenticated requests", async () => {

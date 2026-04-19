@@ -6,6 +6,19 @@ export interface MoodEntry {
   tags: string[];
   voiceNote?: string; // base64 or blob URL
   createdAt: string;
+  aiEmotions?: string[];
+  aiSentiment?: number; // -1..1
+  aiThemes?: string[];
+  aiSummary?: string;
+  aiAnalyzedAt?: string;
+}
+
+export interface AIRecommendations {
+  overall_mood: "thriving" | "steady" | "mixed" | "low" | "struggling";
+  message: string;
+  activities: { title: string; description: string; duration_min: number; category: string }[];
+  music: { vibe: string; description: string; example_artists: string[] }[];
+  bad_day_alert: { triggered: boolean; reason: string; coping_tips: string[] };
 }
 
 export const MOOD_LABELS: Record<number, string> = {

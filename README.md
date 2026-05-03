@@ -206,4 +206,4 @@ supabase/
 
 ---
 
-Built with 💙 on [Lovable](https://lovable.dev).
+Built with 💙 made by Ranjan Das
